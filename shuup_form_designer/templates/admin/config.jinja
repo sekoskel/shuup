@@ -1,0 +1,66 @@
+{% extends "shuup/admin/base.jinja" %}
+{% from "shuup/admin/macros/general.jinja" import content_with_sidebar, content_block %}
+{% from "shuup/admin/macros/multilanguage.jinja" import render_monolingual_fields %}
+{% block title %}{% trans %}Anders Manager{% endtrans %}{% endblock %}
+
+{% block content %}
+    {% call content_with_sidebar(content_id="am_config_form") %}
+        <form method="post" id="am_config_form">
+        {% call content_block(_("Anders Manager Configuration"), "fa-info-circle") %}
+            {% csrf_token %}
+            {{ render_monolingual_fields(form) }}
+            <button type="submit" class="btn btn-warning center-block" onclick="testConfigurations()">
+                <i class="fa fa-check"></i>
+                {% trans %}Test configurations{% endtrans %}
+            </button>
+            <br>
+            <p class="text-center">{% trans %}Please save configuration keys before testing.{% endtrans %}</p>
+        {% endcall %}
+        {% if log_entries %}
+            {% call content_block(_("Logs"), "fa-list") %}
+                {# TODO: Remove this when Shuup has better admin for OrderLogs #}
+                <table class="table table-responsive table-striped">
+                    <thead>
+                        <th>{% trans %}Order{% endtrans %}</th>
+                        <th>{% trans %}Message{% endtrans %}</th>
+                        <th>{% trans %}Created{% endtrans %}</th>
+                    </thead>
+                    <tbody>
+                    {% for log_entry in log_entries %}
+                        <tr>
+                            <td>{{ log_entry.target.id }}</td>
+                            <td>{{ log_entry.message }}</td>
+                            <td>{{ log_entry.created_on|date("d/m/Y H:i:s") }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endcall %}
+        {% endif %}
+        </form>
+    {% endcall %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function testConfigurations() {
+        event.preventDefault();
+        $.ajax({
+            type: "GET",
+            url: "{{ url("shuup_admin:andersmanager.test_configurations") }}",
+            success: function() {
+                Messages.enqueue({
+                    tags: "success",
+                    text: "{% trans %}Configuration test success!{% endtrans %}"
+                });
+            },
+            error: function() {
+                Messages.enqueue({
+                    tags: "error",
+                    text: "{% trans %}Configuration test failed.{% endtrans %}"
+                });
+            }
+        })
+    }
+</script>
+{% endblock %}

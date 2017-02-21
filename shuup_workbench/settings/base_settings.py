@@ -69,7 +69,8 @@ INSTALLED_APPS = add_enabled_addons(SHUUP_ENABLED_ADDONS_FILE, [
     'filer',
     'registration',
     'rest_framework',
-    'rest_framework_swagger'
+    'rest_framework_swagger',
+    'shuup_form_designer'
 ])
 
 MIDDLEWARE_CLASSES = [
